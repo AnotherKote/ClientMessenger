@@ -2,6 +2,7 @@
 #define TRAYMENU_H
 
 #include <QLabel>
+#include <QFile>
 
 class QSystemTrayIcon;
 class QMenu;
@@ -22,8 +23,9 @@ private:
     QFileSystemWatcher *m_pWatcher;
     QSettings *m_pSettings;
 
+    bool parseFile(QFile &path, QString &out_header, QString &out_message);
 private slots:
-    void showPopup();
+    void onDirectoryChanged();
     void showSettings();
 public:
     TrayMenu(QWidget *parent = 0);

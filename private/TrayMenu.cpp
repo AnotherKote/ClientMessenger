@@ -9,6 +9,8 @@
 #include <QMessageBox>
 #include <QFileSystemWatcher>
 #include <QSettings>
+#include <QDir>
+#include <QStringList>
 #include <QDebug>
 
 TrayMenu::TrayMenu(QWidget *parent)
@@ -33,7 +35,7 @@ TrayMenu::TrayMenu(QWidget *parent)
 
     m_pWatcher->addPath(m_pSettings->value("/ClientMessenger/Path").toString());
 
-    connect(showPopup, &QAction::triggered, this, &TrayMenu::showPopup);
+    connect(showPopup, &QAction::triggered, this, &TrayMenu::onDirectoryChanged);
     connect(settings,  &QAction::triggered, this, &TrayMenu::showSettings);
     connect(m_pExitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(m_pSettingsWindow, &Settings::settingsChanged, [&](){
@@ -42,7 +44,7 @@ TrayMenu::TrayMenu(QWidget *parent)
         }
         m_pWatcher->addPath(m_pSettings->value("/ClientMessenger/Path").toString());
     } );
-    connect(m_pWatcher, &QFileSystemWatcher::directoryChanged, this, &TrayMenu::showPopup);
+    connect(m_pWatcher, &QFileSystemWatcher::directoryChanged, this, &TrayMenu::onDirectoryChanged);
 
     m_pTrayIconMenu->addAction(showPopup);
     m_pTrayIconMenu->addAction(settings);
@@ -58,9 +60,32 @@ TrayMenu::~TrayMenu()
 {
 }
 
-void TrayMenu::showPopup()
+bool TrayMenu::parseFile(QFile &path, QString &out_header, QString &out_message)
 {
-    QMessageBox::warning(this, "Внимание! Внимание! Говорит Германия!", m_pSettings->value("/ClientMessenger/Text").toString());
+    bool ret = false;
+    if(path.open(QIODevice::ReadOnly)){
+        QStringList fileData(QString(path.readAll()).split(";"));
+        if(fileData.size() >= 2){
+            out_header = fileData.at(0);
+            out_message = fileData.at(1);
+        } else if (fileData.size() == 1) {
+            out_header = "Внимание!"; //default header
+            out_message = fileData.front();
+        }
+    }
+    return ret;
+}
+
+void TrayMenu::onDirectoryChanged()
+{
+    QDir dir(m_pWatcher->directories().front());
+    QFile messageFile(dir.filePath("message.txt"));
+    if(messageFile.exists()){
+        QString header;
+        QString message;
+        parseFile(messageFile, header, message);
+        QMessageBox::warning(this, header, message);
+    }
 }
 
 void TrayMenu::showSettings()
