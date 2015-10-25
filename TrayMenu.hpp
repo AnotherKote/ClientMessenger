@@ -10,6 +10,7 @@ class QAction;
 class Settings;
 class QFileSystemWatcher;
 class QSettings;
+class PopupMessage;
 
 class TrayMenu : public QLabel
 {
@@ -22,6 +23,7 @@ private:
     Settings *m_pSettingsWindow;
     QFileSystemWatcher *m_pWatcher;
     QSettings *m_pSettings;
+    PopupMessage *m_pPopup;
 
     bool parseFile(QFile &path, QString &out_header, QString &out_message);
 private slots:

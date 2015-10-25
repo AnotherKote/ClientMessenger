@@ -1,5 +1,6 @@
 #include "TrayMenu.hpp"
 #include "Settings.hpp"
+#include "PopupMessage.hpp"
 
 #include <QSystemTrayIcon>
 #include <QMenu>
@@ -21,9 +22,11 @@ TrayMenu::TrayMenu(QWidget *parent)
     , m_pSettingsWindow (nullptr)
     , m_pWatcher (nullptr)
     , m_pSettings (nullptr)
+    , m_pPopup (nullptr)
 {
     setWindowTitle("Message shower");
 
+    m_pPopup = new PopupMessage(this);
     m_pSettings = new QSettings(this);
     m_pWatcher = new QFileSystemWatcher(this);
     m_pSettingsWindow = new Settings(this);
@@ -84,7 +87,10 @@ void TrayMenu::onDirectoryChanged()
         QString header;
         QString message;
         parseFile(messageFile, header, message);
-        QMessageBox::warning(this, header, message);
+        //<@todo m_pPopup->setHeader(header)
+        m_pPopup->setText(message);
+        m_pPopup->show();
+//        QMessageBox::warning(this, header, message);
     }
 }
 

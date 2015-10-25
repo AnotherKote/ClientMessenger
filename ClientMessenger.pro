@@ -12,12 +12,15 @@ TARGET = ClientMessenger
 TEMPLATE = app
 CONFIG += c++11
 RC_FILE = icon.rc
+
 SOURCES += main.cpp \
         private/TrayMenu.cpp \
-        private/Settings.cpp
+        private/Settings.cpp \
+    private/PopupMessage.cpp
 
 HEADERS += TrayMenu.hpp \
-        Settings.hpp
+        Settings.hpp \
+    PopupMessage.hpp
 
 RESOURCES += \
     images.qrc
